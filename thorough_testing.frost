@@ -1,0 +1,371 @@
+[ main ]
+main()() = {
+    [ test instruction generation ]
+    frost.set(frost.integer.64)(at)
+    frost.print.character(at)()
+    frost.print.integer.unsigned(at)()
+
+    [ new line ]
+    print.new_line()()
+
+    [ test offset ]
+    @test
+
+    [ test abstraction IO ]
+    test.io()(a b)
+    print.integer_and_new_line(a)()
+    print.integer_and_new_line(b)()
+
+    [ test predefined variables ]
+    print.integer_and_new_line(frost.error_code)()
+
+    [ test math ]
+    test.math()()
+
+    [ test looping ]
+    frost.set(frost.integer.10)(loop_count)
+    test.loop(loop_count)()
+    print.new_line()()
+
+    [ test setting ]
+    test.set()()
+
+    [ test address checking ]
+    test.address_checker()()
+
+    [ test buffer copy instruction ]
+    test.buffer_copy()()
+
+    [ test binary operations ]
+    test.binary()()
+
+    [ test flags ]
+    test.flags()()
+}
+
+[ print new line ]
+print.new_line()() = {
+    [ set new line ]
+    frost.set(frost.integer.10)(new_line)
+
+    [ print ]
+    frost.print.character(new_line)()
+}
+
+[ print space ]
+print.space()() = {
+    [ set character ]
+    frost.set(frost.integer.32)(space)
+
+    [ print ]
+    frost.print.character(space)()
+}
+
+[ print cell as integer ]
+print.integer.unsigned(value)() = {
+    frost.cast.cell_to_unsigned_integer_string(value)(start end)
+    frost.print.buffer_as_string(start end)()
+    frost.memory.return(start end)()
+}
+
+[ print number with new line ]
+print.integer_and_new_line(value)() = {
+    [ print number ]
+    print.integer.unsigned(value)()
+
+    [ print new line ]
+    print.new_line()()
+}
+
+[ test abstraction IO ]
+test.io()(c d) = {
+    frost.set(frost.integer.25)(a)
+    test.io_subroutine(a)(b)
+    print.integer_and_new_line(b)()
+    frost.set(frost.integer.45)(c)
+    frost.set(frost.integer.55)(d)
+}
+test.io_subroutine(c)(d) = {
+    print.integer_and_new_line(c)()
+    frost.set(frost.integer.35)(d)
+}
+
+[ test math ]
+test.math()() = {
+    [ setup variables ]
+    frost.set(frost.integer.500)(x)
+    frost.set(frost.integer.200)(y)
+
+    [ do calculations ]
+    frost.integer.add(x y)(result.add)
+    frost.integer.subtract(x y)(result.subtract)
+    frost.integer.multiply(x y)(result.multiply)
+    frost.integer.divide(x y)(result.divide)
+    frost.integer.modulous(x y)(result.modulous)
+
+    [ print calculations ]
+    print.integer_and_new_line(result.add)()
+    print.integer_and_new_line(result.subtract)()
+    print.integer_and_new_line(result.multiply)()
+    print.integer_and_new_line(result.divide)()
+    print.integer_and_new_line(result.modulous)()
+    frost.print.binary(result.add)()
+    print.new_line()()
+}
+
+[ test loop ]
+test.loop(loop_count)() = {
+    [ setup initial values ]
+    frost.set(frost.integer.0)(index)
+    frost.set(frost.integer.0)(start)
+    frost.set(frost.integer.1)(increment)
+
+    [ setup loop start ]
+    @loop.start
+
+    [ check if loop is still valid ]
+    frost.integer.within_range(start index loop_count #frost.always)(#exit_loop)
+    frost.jump(#exit_loop @loop.exit)()
+
+    [ print value ]
+    print.integer_and_new_line(index)()
+
+    [ increment index ]
+    frost.integer.add(index increment)(index)
+
+    [ go to start of loop ]
+    frost.jump(#frost.always @loop.start)()
+
+    [ setup loop exit ]
+    @loop.exit
+}
+
+[ test literals / sets ]
+test.set()() = {
+    [ perform literal sets ]
+    frost.set(frost.boolean.true)(true)
+    frost.set(frost.boolean.false)(false)
+    frost.set(frost.binary.1010)(binary)
+    frost.set(frost.integer.234561)(integer)
+    frost.set(frost.hexadecimal.feedbeef)(hexadecimal)
+
+    [ perform offset sets ]
+    @offset
+    frost.set(@offset)(offset)
+
+    [ perform string sets ]
+    frost.set("Hello World!")(message.start message.end)
+
+    [ print values ]
+    print.integer_and_new_line(true)()
+    print.integer_and_new_line(false)()
+    print.integer_and_new_line(binary)()
+    print.integer_and_new_line(integer)()
+    print.integer_and_new_line(hexadecimal)()
+    print.integer_and_new_line(offset)()
+    frost.print.buffer_as_string(message.start message.end)()
+
+    [ next line ]
+    print.new_line()()
+}
+
+[ test address checking ]
+test.address_checker()() = {
+    [ create & print strings ]
+    frost.set("%25;Testing addr%3C;ess checker.%25;")(message.start message.end)
+    frost.print.buffer_as_string(message.start message.end)()
+    print.new_line()()
+
+    [ print error code ]
+    print.integer_and_new_line(frost.error_code)()
+
+    [ reset error code ]
+    frost.reset.error_code()()
+
+    [ print error code ]
+    print.integer_and_new_line(frost.error_code)()
+
+    [ test address ]
+    frost.set(frost.integer.0)(null)
+    frost.set(frost.integer.8)(bits)
+    frost.io.address_to_cell(#frost.always null bits)(oof)
+
+    [ print error code ]
+    print.integer_and_new_line(frost.error_code)()
+    print.integer_and_new_line(frost.error_code)()
+
+    [ reset error code ]
+    frost.reset.error_code()()
+    
+    [ print error code ]
+    print.integer_and_new_line(frost.error_code)()
+
+    [ print new lines for next test ]
+    print.new_line()()
+    print.new_line()()
+
+    [ allocate memory ]
+    frost.set(frost.integer.10)(length)
+    frost.memory.request(length)(buffer.start buffer.end)
+
+    [ setup addresses ]
+    frost.set(frost.integer.1)(adjust)
+    frost.copy(buffer.start)(address)
+    frost.integer.subtract(address adjust)(lower_invalid_address)
+    frost.copy(buffer.end)(address)
+    frost.integer.add(address adjust)(upper_invalid_address)
+
+    [ test addresses ]
+    test.address_is_valid(buffer.start)()
+    test.address_is_valid(buffer.end)()
+    test.address_is_valid(lower_invalid_address)()
+    test.address_is_valid(upper_invalid_address)()
+
+    [ clean up memory ]
+    frost.memory.return(buffer.start buffer.end)()
+
+    [ test addresses again ]
+    test.address_is_valid(buffer.start)()
+    test.address_is_valid(buffer.end)()
+    test.address_is_valid(lower_invalid_address)()
+    test.address_is_valid(upper_invalid_address)()
+
+    [ test buffer length calculator ]
+    frost.buffer.calculate_length(lower_invalid_address upper_invalid_address)(length)
+    print.integer_and_new_line(length)()
+}
+
+[ test one address for validity ]
+test.address_is_valid(address)() = {
+    [ setup variables ]
+    frost.set(frost.integer.8)(bit_count)
+    frost.set(frost.integer.1234)(write)
+
+    [ reset error code for demonstration ]
+    frost.reset.error_code()()
+
+    [ test read ]
+    frost.io.address_to_cell(#frost.always address bit_count)(read)
+    print.integer.unsigned(frost.error_code)()
+    print.space()()
+
+    [ reset error code ]
+    frost.reset.error_code()()
+
+    [ test write ]
+    frost.io.cell_to_address(#frost.always write bit_count)(address)
+    print.integer.unsigned(frost.error_code)()
+    print.new_line()()
+}
+
+[ test the buffer copy instruction ]
+test.buffer_copy()() = {
+    [ open string ]
+    frost.set("I might be a duplicate buffer! :p")(a.start a.end)
+
+    [ calculate length ]
+    frost.buffer.calculate_length(a.start a.end)(length)
+
+    [ allocate buffer ]
+    [ frost.integer.add(length length)(length) [ make lengths different ] ]
+    frost.memory.request(length)(b.start b.end)
+
+    [ print unaltered buffers ]
+    frost.print.buffer_as_string(a.start a.end)()
+    print.new_line()()
+    frost.print.buffer_as_string(b.start b.end)()
+    print.new_line()()
+
+    [ perform copy ]
+    frost.copy.buffer(a.start a.end)(b.start b.end)
+
+    [ print result ]
+    frost.print.buffer_as_string(b.start b.end)()
+    print.new_line()()
+
+    [ return memory ]
+    frost.memory.return(b.start b.end)()
+}
+
+[ test binary instructions ]
+test.binary()() = {
+    [ setup variables ]
+    frost.set(frost.binary.11110000)(a)
+    frost.set(frost.binary.11001100)(b)
+    frost.set(frost.binary.10101010)(c)
+    frost.set(frost.integer.2)(shift)
+
+    [ perform operations ]
+    frost.binary.or(a b)(or.result)
+    frost.binary.invert(a)(invert.result)
+    frost.binary.and(a b)(and.result)
+    frost.binary.xor(a b)(xor.result)
+    frost.binary.shift_higher(a shift)(higher.result)
+    frost.binary.shift_lower(a shift)(lower.result)
+    frost.binary.overwrite(a b c)(overwrite.result)
+
+    [ print results ]
+    frost.print.binary(or.result)()
+    print.new_line()()
+    frost.print.binary(invert.result)()
+    print.new_line()()
+    frost.print.binary(and.result)()
+    print.new_line()()
+    frost.print.binary(xor.result)()
+    print.new_line()()
+    frost.print.binary(higher.result)()
+    print.new_line()()
+    frost.print.binary(lower.result)()
+    print.new_line()()
+    frost.print.binary(overwrite.result)()
+    print.new_line()()
+}
+
+[ test flags ]
+test.flags()() = {
+    [ setup flags ]
+    frost.set(frost.boolean.false)(false)
+    frost.set(frost.boolean.true)(true)
+    frost.flag.set(false)(#hello_world)
+    frost.set(#hello_world)(flag_ID)
+
+    [ get flag ]
+    frost.flag.get(#hello_world)(value)
+
+    [ print values ]
+    print.integer_and_new_line(flag_ID)()
+    print.integer_and_new_line(value)()
+
+    [ test flag inversion ]
+    frost.flag.invert(#hello_world)(#subscribe)
+    frost.set(#subscribe)(flag_ID)
+    print.integer_and_new_line(flag_ID)()
+    print.integer_and_new_line(value)()
+    frost.flag.get(#subscribe)(value)
+    print.integer_and_new_line(value)()
+    print.new_line()()
+
+    [ test flag or ]
+    frost.flag.set(false)(#a)
+    frost.flag.set(false)(#b)
+    frost.flag.or(#a #b)(#c)
+    frost.flag.get(#c)(value)
+    print.integer_and_new_line(value)()
+    print.new_line()()
+
+    [ test flag and ]
+    frost.flag.set(true)(#a)
+    frost.flag.set(true)(#b)
+    frost.flag.and(#a #b)(#c)
+    frost.flag.get(#c)(value)
+    print.integer_and_new_line(value)()
+    print.new_line()()
+
+    [ test flag xor ]
+    frost.flag.set(true)(#a)
+    frost.flag.set(true)(#b)
+    frost.flag.xor(#a #b)(#c)
+    frost.flag.get(#c)(value)
+    print.integer_and_new_line(value)()
+    print.new_line()()
+}
