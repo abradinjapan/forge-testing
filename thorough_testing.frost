@@ -41,6 +41,9 @@ main()() = {
 
     [ test flags ]
     test.flags()()
+
+    [ test files ]
+    test.file_io()()
 }
 
 [ print new line ]
@@ -368,4 +371,23 @@ test.flags()() = {
     frost.flag.get(#c)(value)
     print.integer_and_new_line(value)()
     print.new_line()()
+}
+
+[ test file IO ]
+test.file_io()() = {
+    [ setup string data ]
+    frost.set("oof")(message.start message.end)
+    frost.set("./temp.txt")(path.start path.end)
+
+    [ write file ]
+    frost.io.buffer_to_file(message.start message.end)(path.start path.end)
+
+    [ read file ]
+    frost.io.file_to_buffer(path.start path.end)(file.start file.end)
+
+    [ print file ]
+    frost.print.buffer_as_string(file.start file.end)()
+
+    [ return memory ]
+    frost.memory.return(file.start file.end)()
 }
