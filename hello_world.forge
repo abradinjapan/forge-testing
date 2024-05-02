@@ -7,6 +7,5 @@ main()() = {
     forge.print.buffer_as_string(message.start message.end)()
 
     [ print new line ]
-    forge.set(forge.integer.10)(new_line)
-    forge.print.character(new_line)()
+    print.new_line()()
 }

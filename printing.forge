@@ -1,0 +1,5 @@
+[ print new line ]
+print.new_line()() = {
+    forge.set(forge.integer.10)(character)
+    forge.print.character(character)()
+}

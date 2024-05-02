@@ -397,33 +397,41 @@ test.file_io()() = {
 
 [ test rtc ]
 test.run_time_coding()() = {
-    [ setup file path ]
-    forge.set("../forge-testing/hello_world.forge")(path.start path.end)
+    [ setup file paths ]
+    forge.set("../forge-testing/hello_world.forge")(path_1.start path_1.end)
+    forge.set("../forge-testing/printing.forge")(path_2.start path_2.end)
 
-    [ load program ]
-    forge.io.file_to_buffer(path.start path.end)(user_code.start user_code.end)
+    [ load programs ]
+    forge.io.file_to_buffer(path_1.start path_1.end)(user_code_1.start user_code_1.end)
+    forge.io.file_to_buffer(path_2.start path_2.end)(user_code_2.start user_code_2.end)
 
     [ DEBUG ]
-    forge.print.buffer_as_string(user_code.start user_code.end)()
+    forge.print.buffer_as_string(user_code_1.start user_code_1.end)()
+    forge.print.buffer_as_string(user_code_2.start user_code_2.end)()
 
     [ create user codes buffer ]
-    forge.set(forge.integer.16)(buffer_size)
+    forge.set(forge.integer.32)(buffer_size)
     forge.memory.request(buffer_size)(codes.start codes.end)
 
-    [ DEBUG ]
-    print.integer_and_new_line(codes.start)()
-    print.integer_and_new_line(codes.end)()
-
-    [ append buffer ]
+    [ append buffers ]
     forge.set(forge.integer.64)(bit_size)
     forge.set(forge.integer.8)(byte_size)
-    forge.io.cell_to_address(#forge.always user_code.start bit_size)(codes.start)
-    forge.integer.add(codes.start byte_size)(address)
-    forge.io.cell_to_address(#forge.always user_code.end bit_size)(address)
+    forge.copy(codes.start)(address)
+    forge.io.cell_to_address(#forge.always user_code_1.start bit_size)(address)
+    forge.integer.add(address byte_size)(address)
+    forge.io.cell_to_address(#forge.always user_code_1.end bit_size)(address)
+    forge.integer.add(address byte_size)(address)
+    forge.io.cell_to_address(#forge.always user_code_2.start bit_size)(address)
+    forge.integer.add(address byte_size)(address)
+    forge.io.cell_to_address(#forge.always user_code_2.end bit_size)(address)
 
     [ compile ]
     forge.set(forge.boolean.false)(debug)
     forge.compile(codes.start codes.end debug)(program.start program.end error_occured error_message.start error_message.end location.file_index location.line_number location.character_index)
+
+    [ skip past running program and print error if compilation failure ]
+    forge.integer.within_range(forge.constant.true error_occured forge.constant.true #forge.never)(#print_error)
+    forge.jump(#print_error @print_error)()
 
     [ setup context ]
     forge.open.context(program.start program.end)(context.start context.end)
@@ -432,8 +440,18 @@ test.run_time_coding()() = {
     forge.set(forge.integer.n1)(run_instruction_count)
     forge.run(context.start context.end run_instruction_count)()
 
+    [ skip past error printing ]
+    forge.jump(#forge.always @clean_up)()
+
+    [ print error ]
+    @print_error
+    forge.print.buffer_as_string(error_message.start error_message.end)()
+    forge.memory.return(error_message.start error_message.end)()
+
     [ clean up ]
-    forge.memory.return(user_code.start user_code.end)()
+    @clean_up
+    forge.memory.return(user_code_1.start user_code_1.end)()
+    forge.memory.return(user_code_2.start user_code_2.end)()
     forge.memory.return(codes.start codes.end)()
     forge.memory.return(context.start context.end)()
     forge.memory.return(program.start program.end)()

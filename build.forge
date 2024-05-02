@@ -1,0 +1,46 @@
+[ entry point ]
+main()() = {
+    [ setup file paths ]
+    forge.set(forge.integer.2)(file_count)
+    forge.set("hello_world.forge")(file_1.start file_1.end)
+    forge.set("printing.forge")(file_2.start file_2.end)
+
+    [ open files buffer ]
+    build.open.files_buffer(file_count)(files.start files.end)
+
+    [ append files ]
+
+}
+
+[ open files buffer ]
+build.open.files_buffer(file_count)(files.start files.end) = {
+    [ calculate length ]
+    frost.set(frost.constant.cell_byte_size)(cell_size)
+    frost.integer.multiply(cell_size forge.constant.2)(buffer_handle_size)
+    frost.integer.multiply(buffer_handle_size file_count)(buffer_length)
+
+    [ allocate buffer ]
+    forge.memory.request(buffer_length)(files.start files.end)
+
+    [ quit if request was invalid ]
+    frost.integer.within_range(forge.constant.0 files.start forge.constant.0 #forge.never)(#error)
+    forge.jump(#error @return)()
+
+    [ return from function ]
+    
+}
+
+[ append buffer ]
+build.append_buffer(current buffer.start buffer.end)(current.output) = {
+    build.append_cell(current buffer.start)(current)
+    build.append_cell(current buffer.end)(current.output)
+}
+
+[ append cell ]
+build.append_cell(current cell)(current.output) = {
+    [ append data ]
+    frost.io.cell_to_address(#forge.always cell forge.constant.cell_bit_size)(current)
+
+    [ skip past written bytes ]
+    forge.integer.add(current forge.constant.cell_byte_size)(current.output)
+}
