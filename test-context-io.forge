@@ -1,0 +1,14 @@
+[ main ]
+main()() = {
+    [ get context inputs ]
+    forge.get.program_inputs()(input.start input.end)
+
+    [ print inputs ]
+    forge.print.buffer_as_string(input.start input.end)()
+
+    [ create new string ]
+    forge.set("Argh! Mateys!")(string.start string.end)
+
+    [ pass string to calling context ]
+    forge.set.program_outputs(string.start string.end)()
+}

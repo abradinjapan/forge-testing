@@ -47,6 +47,9 @@ main()() = {
 
     [ test run time coding ]
     test.run_time_coding()()
+
+    [ test context io ]
+    test.context_io()()
 }
 
 [ print new line ]
@@ -452,6 +455,63 @@ test.run_time_coding()() = {
     @clean_up
     forge.memory.return(user_code_1.start user_code_1.end)()
     forge.memory.return(user_code_2.start user_code_2.end)()
+    forge.memory.return(codes.start codes.end)()
+    forge.memory.return(context.start context.end)()
+    forge.memory.return(program.start program.end)()
+}
+
+[ test context io ]
+test.context_io()() = {
+    [ setup file paths ]
+    forge.set("./test-context-io.forge")(path_1.start path_1.end)
+
+    [ load programs ]
+    forge.io.file_to_buffer(path_1.start path_1.end)(user_code_1.start user_code_1.end)
+
+    [ create user codes buffer ]
+    forge.set(forge.integer.16)(buffer_size)
+    forge.memory.request(buffer_size)(codes.start codes.end)
+
+    [ append buffers ]
+    forge.copy(codes.start)(address)
+    forge.io.cell_to_address(#forge.always user_code_1.start forge.constant.cell_bit_size)(address)
+    forge.integer.add(address forge.constant.cell_byte_size)(address)
+    forge.io.cell_to_address(#forge.always user_code_1.end forge.constant.cell_bit_size)(address)
+
+    [ compile ]
+    forge.set(forge.boolean.false)(debug)
+    forge.compile(codes.start codes.end debug)(program.start program.end error_occured error_message.start error_message.end location.file_index location.line_number location.character_index)
+
+    [ skip past running program and print error if compilation failure ]
+    forge.integer.within_range(forge.constant.true error_occured forge.constant.true #forge.never)(#print_error)
+    forge.jump(#print_error @print_error)()
+
+    [ setup context ]
+    forge.open.context(program.start program.end)(context.start context.end)
+
+    [ pass context input ]
+    forge.set("Context input received and printed!")(input.start input.end)
+    forge.context_buffer.set_inputs(context.start context.end input.start input.end)()
+
+    [ run ]
+    forge.set(forge.integer.n1)(run_instruction_count)
+    forge.run(context.start context.end run_instruction_count)()
+
+    [ print context output ]
+    forge.context_buffer.get_outputs(context.start context.end)(output.start output.end)
+    forge.print.buffer_as_string(output.start output.end)()
+
+    [ skip past error printing ]
+    forge.jump(#forge.always @clean_up)()
+
+    [ print error ]
+    @print_error
+    forge.print.buffer_as_string(error_message.start error_message.end)()
+    forge.memory.return(error_message.start error_message.end)()
+
+    [ clean up ]
+    @clean_up
+    forge.memory.return(user_code_1.start user_code_1.end)()
     forge.memory.return(codes.start codes.end)()
     forge.memory.return(context.start context.end)()
     forge.memory.return(program.start program.end)()
